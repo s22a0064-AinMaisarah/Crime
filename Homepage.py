@@ -16,20 +16,23 @@ import numpy as np
 st.set_page_config(page_title="Urban Crime Analytics Visualization Dashboard", layout="wide")
 
 # Header title
-st.header("🧠 Time to Think — Sleep, Anxiety and University Start Time")
+st.header("Explore trends, hotspots, and patterns through interactive visuals")
 
 # Intro paragraph
 st.write(
     """
-    A scientific visualization exploring how **sleep quality**, **trait anxiety**, and **preferred class start times** interact among university students.
+    This dashboard presents an interactive visualization of urban crime data, it enables a deeper understanding of crime distribution 
+    and supports data-driven decision-making for urban safety and policy planning.
     """
 )
 
 # Dataset information
 st.write(
     """
-    This dashboard visualizes data from **Norbury & Evans (2018)** published in *Mendeley Data (V1)*.  
-    The study explores psychological and behavioral patterns related to sleep, chronotype, and academic start times.
+   This dataset, originally titled "Uber and Urban Crime" and published on 12 October 2019 by Bryan Weber,
+   focuses primarily on crime-related data within urban environments. Although the dataset references Uber, 
+   the analysis in this dashboard emphasizes the crime dimension, exploring patterns, frequency, and distribution of criminal
+   incidents associated with urban mobility contexts.
     """
 )
 
