@@ -5,6 +5,7 @@ plotly express
 scikit-learn
 matplotlib
 seaborn
+plotly
 
 
 
