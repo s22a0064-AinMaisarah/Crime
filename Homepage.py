@@ -1,5 +1,5 @@
 # ===================================================
-# Sleep, Anxiety & Start Time Visualization Homepage
+# Urban Crime Analytics Visualization Dashboard Homepage
 # ===================================================
 
 import streamlit as st
@@ -13,7 +13,7 @@ import numpy as np
 # ------------------------------------------------------------
 # Page Setup
 # ------------------------------------------------------------
-st.set_page_config(page_title="Sleep, Anxiety & Start Time Visualization", layout="wide")
+st.set_page_config(page_title="Urban Crime Analytics Visualization Dashboard", layout="wide")
 
 # Header title
 st.header("🧠 Time to Think — Sleep, Anxiety and University Start Time")
