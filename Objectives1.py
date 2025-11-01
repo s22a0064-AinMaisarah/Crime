@@ -48,148 +48,80 @@ st.write("✅ File loaded successfully!")
 st.write(df.shape)
 st.write(df.head())
 
-# ------------------------------------------------------------
-# 1️⃣ Sleep Quality Distribution (Histogram)
-# ------------------------------------------------------------
-fig1 = px.histogram(
-    df, 
-    x="psqi_2_groups", 
-    nbins=15, 
-    color_discrete_sequence=[colors[0]],
-    title="1️⃣ Distribution of Sleep Quality (psqi_2_groups)"
+# -----------------------------------------------------------------------
+# 1️⃣ Using (K-Means & PCA) to Uncover Crime Behavior Patterns in Cities.
+# -----------------------------------------------------------------------
+# Select crime-related columns
+features = ['violent_crime', 'property_crime', 'whitecollar_crime', 'social_crime']
+X = df_uber_cleaned[features]
+
+# Scale the features
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# Determine optimal number of clusters using the Elbow Method
+wcss = []  # within-cluster-sum-of-squares
+for k in range(2, 10):
+    kmeans = KMeans(n_clusters=k, random_state=42, n_init=10) # Added n_init
+    kmeans.fit(X_scaled)
+    wcss.append(kmeans.inertia_)
+
+# Plot the Elbow Method
+plt.figure(figsize=(8,6))
+plt.plot(range(2, 10), wcss, marker='o')
+plt.title('Elbow Method for Optimal k')
+plt.xlabel('Number of Clusters')
+plt.ylabel('WCSS')
+plt.show()
+
+# Apply K-Means clustering (Choosing k=3 based on visual inspection of the elbow plot)
+kmeans = KMeans(n_clusters=3, random_state=42, n_init=10) # Added n_init
+df_uber_cleaned['crime_cluster'] = kmeans.fit_predict(X_scaled)
+
+# Perform PCA for visualization
+pca = PCA(n_components=2)
+pca_data = pca.fit_transform(X_scaled)
+
+df_uber_cleaned['PC1'] = pca_data[:, 0]
+df_uber_cleaned['PC2'] = pca_data[:, 1]
+
+# Visualize the clusters using PCA with Plotly Express for interactivity
+fig_clusters = px.scatter(
+    df_uber_cleaned,
+    x='PC1',
+    y='PC2',
+    color='crime_cluster',
+    hover_data=['crime_cluster', 'violent_crime', 'property_crime', 'whitecollar_crime', 'social_crime', 'city_cat', 'state', 'age', 'income', 'poverty'],
+    title='Crime Pattern Clusters (PCA)',
+    labels={'crime_cluster': 'Crime Cluster'}
 )
-fig1.update_layout(xaxis_title="PSQI (Higher = Poorer Sleep)", yaxis_title="Count")
-st.plotly_chart(fig1, use_container_width=True)
+fig_clusters.show()
+
+# Analyze cluster profiles
+cluster_profile = df_uber_cleaned.groupby('crime_cluster')[features].mean().reset_index()
+cluster_profile_melted = cluster_profile.melt(id_vars='crime_cluster', var_name='Crime Type', value_name='Average Crime Score')
+
+# Visualize cluster profiles interactively using Plotly Express
+fig_cluster_profile = px.bar(
+    cluster_profile_melted,
+    x='Crime Type',
+    y='Average Crime Score',
+    color='crime_cluster',
+    barmode='group',
+    hover_data=['crime_cluster', 'Crime Type', 'Average Crime Score'],
+    title='Interactive Bar Chart: Average Crime Scores per Cluster',
+    labels={'crime_cluster': 'Crime Cluster'}
+)
+fig_cluster_profile.show()
 
 st.write(
     """
     **Interpretation:**  
-    Sleep quality among students varies widely, with a notable portion reporting **poor or very poor sleep**.  
-    This reflects the growing concern about sleep deprivation and its psychological effects among young adults.
+      Cluster 0: This cluster generally represents cities with moderate crime levels across the four crime types (violent, property, white-collar, and social). The average crime scores for these categories are in the mid-range compared to the other clusters.
+      Cluster 1: This cluster appears to represent cities with high crime levels across most categories, particularly violent and property crimes, and the highest average white-collar crime. These cities might face broader challenges related to crime.
+      Cluster 2: This cluster seems to encompass cities with lower crime levels across all crime types. The average crime scores for this cluster are consistently the lowest.
     """
 )
-
-# ------------------------------------------------------------
-# 2️⃣ Trait Anxiety Distribution (Histogram)
-# ------------------------------------------------------------
-fig2 = px.histogram(
-    df, 
-    x="Trait_Anxiety", 
-    nbins=15, 
-    color_discrete_sequence=[colors[1]],
-    title="2️⃣ Distribution of Trait Anxiety Scores"
-)
-fig2.update_layout(xaxis_title="Trait Anxiety Score", yaxis_title="Frequency")
-st.plotly_chart(fig2, use_container_width=True)
-
-st.write(
-    """
-    **Interpretation:**  
-    Anxiety scores are distributed continuously across the student sample, 
-    suggesting diverse levels of emotional resilience and stress management within the cohort.
-    """
-)
-
-# ------------------------------------------------------------
-# 3️⃣ Correlation Between Sleep Quality and Anxiety (Scatter)
-# ------------------------------------------------------------
-r, p = stats.pearsonr(df["psqi_2_groups"].dropna(), df["Trait_Anxiety"].dropna())
-fig3 = px.scatter(
-    df,
-    x="psqi_2_groups",
-    y="Trait_Anxiety",
-    color_discrete_sequence=[colors[2]],
-    trendline="ols",
-    title=f"3️⃣ Relationship Between Sleep Quality and Anxiety (r = {r:.2f}, p = {p:.3g})"
-)
-fig3.update_layout(
-    xaxis_title="Sleep Quality (Higher = Poorer Sleep)",
-    yaxis_title="Trait Anxiety Score"
-)
-st.plotly_chart(fig3, use_container_width=True)
-
-st.write(
-    """
-    **Interpretation:**  
-    The scatterplot reveals a **positive correlation** between poor sleep and higher anxiety levels.  
-    Students with higher PSQI scores (indicating worse sleep) tend to report higher anxiety, reinforcing prior findings by Norbury & Evans (2018).
-    """
-)
-
-# ------------------------------------------------------------
-# 4️⃣ Trait Anxiety by Sleep Category (Box Plot)
-# ------------------------------------------------------------
-fig4 = px.box(
-    df,
-    x="Sleep_Category",
-    y="Trait_Anxiety",
-    color="Sleep_Category",
-    color_discrete_sequence=[colors[0], colors[1]],
-    title="4️⃣ Trait Anxiety by Sleep Category"
-)
-fig4.update_layout(xaxis_title="Sleep Category", yaxis_title="Anxiety Score")
-st.plotly_chart(fig4, use_container_width=True)
-
-st.write(
-    """
-    **Interpretation:**  
-    Students classified as *poor sleepers* exhibit **higher median anxiety levels** compared to those with good sleep quality.  
-    This highlights the bidirectional link between psychological stress and sleep disturbance.
-    """
-)
-
-# ------------------------------------------------------------
-# 5️⃣ Chronotype and Start Time Preferences (Grouped Bar Chart)
-# ------------------------------------------------------------
-ctab = pd.crosstab(df["Start_time_code"], df["MEQ"])
-ctab = ctab.reset_index().melt(id_vars="Start_time_code", var_name="Chronotype", value_name="Count")
-
-fig5 = px.bar(
-    ctab,
-    x="Start_time_code",
-    y="Count",
-    color="Chronotype",
-    color_discrete_sequence=colors,
-    barmode="group",
-    title="5️⃣ Preferred Start Time by Chronotype"
-)
-fig5.update_layout(xaxis_title="Preferred Start Time", yaxis_title="Count")
-st.plotly_chart(fig5, use_container_width=True)
-
-st.write(
-    """
-    **Interpretation:**  
-    Morning-type students generally prefer earlier class schedules, while evening-types lean toward later start times.  
-    This reflects the influence of **chronotype** on daily energy patterns and academic engagement.
-    """
-)
-
-# ------------------------------------------------------------
-# 6️⃣ Correlation Heatmap (Matrix)
-# ------------------------------------------------------------
-numeric = df.select_dtypes(include=np.number)
-corr = numeric.corr().round(2)
-
-fig6 = go.Figure(
-    data=go.Heatmap(
-        z=corr.values,
-        x=corr.columns,
-        y=corr.columns,
-        colorscale="RdBu",
-        reversescale=True
-    )
-)
-fig6.update_layout(title="6️⃣ Correlation Matrix: Sleep, Anxiety & Behavioral Variables")
-st.plotly_chart(fig6, use_container_width=True)
-
-st.write(
-    """
-    **Interpretation:**  
-    Strongest relationships appear between **PSQI ↔ Anxiety** and **PSQI ↔ Daytime Dozing**,  
-    indicating that poorer sleep quality contributes to both **emotional stress** and **daytime fatigue**.
-    """
-)
-
 # ------------------------------------------------------------
 # Summary Box
 # ------------------------------------------------------------
