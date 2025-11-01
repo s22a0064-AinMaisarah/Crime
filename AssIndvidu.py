@@ -3,16 +3,12 @@ import streamlit as st
 # ------------------------------------------------------------
 # Page Setup
 # ------------------------------------------------------------
-st.set_page_config(
-    page_title="Urban Crime Analytics Visualization Dashboard",
-    layout="wide"
-)
+st.set_page_config(page_title="Urban Crime Analytics Visualization Dashboard", layout="wide")
 
-# ------------------------------------------------------------
-# Dashboard Introduction
-# ------------------------------------------------------------
+# Header title
 st.header("Explore trends, hotspots, and patterns through interactive visuals")
 
+# Intro paragraph
 st.write(
     """
     This dashboard presents an interactive visualization of urban crime data, enabling a deeper understanding 
@@ -20,26 +16,19 @@ st.write(
     """
 )
 
+# Dataset information
 st.write(
     """
-    The dataset, originally titled **"Uber and Urban Crime"** (published on 12 October 2019 by Bryan Weber),
-    focuses primarily on urban crime data. Although the dataset references Uber, 
-    the analysis in this dashboard emphasizes the crime dimension — exploring patterns, frequency, 
-    and spatial distribution of criminal incidents within urban environments.
+   This dataset, originally titled "Uber and Urban Crime" (published by Bryan Weber, 2019),
+   focuses primarily on crime-related data within urban environments. The analysis emphasizes
+   the crime dimension—exploring patterns, frequency, and distribution of incidents in cities.
     """
 )
 
-# ------------------------------------------------------------
-# Page Navigation Setup
-# ------------------------------------------------------------
-page1 = st.Page('Objectives1.py', title='Urban Crime Analytics Visualization Dashboard', icon=":material/bar_chart:")
-page2 = st.Page('Objectives2.py', title='Urban Crime Analytics Visualization Dashboard', icon=":material/groups:")
-page3 = st.Page('Objectives3.py', title='PUrban Crime Analytics Visualization Dashboard', icon=":material/timeline:")
+# Navigation Pages
+page1 = st.Page("pages/Objective1.py", title="Distribution and Correlation", icon=":material/bar_chart:")
+page2 = st.Page("pages/Objective2.py", title="Group Comparisons and Chronotype", icon=":material/groups:")
+page3 = st.Page("pages/Objective3.py", title="Preferred Start Time & Correlation Matrix", icon=":material/timeline:")
 
-pg = st.navigation(
-    {
-        "Menu": [page1, page2, page3]
-    }
-)
-
+pg = st.navigation({"Menu": [page1, page2, page3]})
 pg.run()
