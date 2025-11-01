@@ -102,65 +102,127 @@ if not df.empty:
 
     st.markdown("---")
 
-    # === MACHINE LEARNING PIPELINE ===
-    st.subheader("Machine Learning Workflow")
+   import streamlit as st
+import pandas as pd
+from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import KMeans
+from sklearn.decomposition import PCA
+import matplotlib.pyplot as plt
+import seaborn as sns
+# Import Plotly for the conversion
+import plotly.express as px
+import plotly.graph_objects as go
+import numpy as np # Needed for the elbow method plot range
 
-    st.info("""
-    The data was standardized using **StandardScaler**, clustered with **K-Means (k=3)**, 
-    and reduced to two principal components using **PCA** for visualization.
-    """)
+# --- Assuming 'df' is your loaded DataFrame from the previous step ---
+# --- (Placeholder for context) ---
+# df = pd.read_csv(...) 
+# features = ['violent_crime', 'property_crime', 'whitecollar_crime', 'social_crime']
+# X = df[features]
+# scaler = StandardScaler()
+# X_scaled = scaler.fit_transform(X)
 
+
+# === MACHINE LEARNING PIPELINE ===
+st.subheader("Machine Learning Workflow")
+
+st.info("""
+The data was standardized using **StandardScaler**, clustered with **K-Means (k=3)**,
+and reduced to two principal components using **PCA** for visualization.
+""")
+
+# Note: Ensure 'df' and 'features' are defined before this code block runs
+# Placeholder initialization for the conversion to work if run standalone
+if 'df' not in locals():
+    st.warning("Please ensure the 'df' DataFrame is loaded and 'features' are defined.")
+    # Create dummy data for demonstration purposes only
+    np.random.seed(42)
+    df = pd.DataFrame({
+        'violent_crime': np.random.rand(100)*100,
+        'property_crime': np.random.rand(100)*150,
+        'whitecollar_crime': np.random.rand(100)*50,
+        'social_crime': np.random.rand(100)*75
+    })
     features = ['violent_crime', 'property_crime', 'whitecollar_crime', 'social_crime']
     X = df[features]
-
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X)
 
-    # --- Elbow Method ---
-    st.subheader("Elbow Method – Optimal Number of Clusters")
-    wcss = []
-    for k in range(2, 10):
-        kmeans = KMeans(n_clusters=k, random_state=42, n_init=10)
-        kmeans.fit(X_scaled)
-        wcss.append(kmeans.inertia_)
 
-    fig, ax = plt.subplots(figsize=(6, 4))
-    ax.plot(range(2, 10), wcss, marker='o')
-    ax.set_title("Elbow Method for Optimal k", fontsize=12)
-    ax.set_xlabel("Number of Clusters (k)")
-    ax.set_ylabel("WCSS")
-    st.pyplot(fig)
+# --- Elbow Method (Plotly Conversion) ---
+st.subheader("Elbow Method – Optimal Number of Clusters")
+wcss = []
+for k in range(2, 10):
+    kmeans = KMeans(n_clusters=k, random_state=42, n_init=10)
+    kmeans.fit(X_scaled)
+    wcss.append(kmeans.inertia_)
 
-    # --- Apply KMeans ---
-    kmeans = KMeans(n_clusters=3, random_state=42, n_init=10)
-    df['crime_cluster'] = kmeans.fit_predict(X_scaled)
+# Convert Matplotlib Elbow plot to Plotly
+fig_elbow = go.Figure(data=go.Scatter(
+    x=list(range(2, 10)), 
+    y=wcss, 
+    mode='lines+markers',
+    marker=dict(size=8)
+))
+fig_elbow.update_layout(
+    title="Elbow Method for Optimal k",
+    xaxis_title="Number of Clusters (k)",
+    yaxis_title="Within-Cluster Sum of Squares (WCSS)",
+    height=400,
+    margin=dict(l=20, r=20, t=40, b=20)
+)
+st.plotly_chart(fig_elbow, use_container_width=True)
 
-    # --- PCA Visualization ---
-    st.subheader("PCA Visualization – Crime Pattern Clusters")
-    pca = PCA(n_components=2)
-    pca_data = pca.fit_transform(X_scaled)
-    df['PC1'], df['PC2'] = pca_data[:, 0], pca_data[:, 1]
 
-    fig2, ax2 = plt.subplots(figsize=(7, 5))
-    sns.scatterplot(
-        data=df, x='PC1', y='PC2', hue='crime_cluster',
-        palette='viridis', s=120, ax=ax2, edgecolor='black'
-    )
-    ax2.set_title("Crime Pattern Clusters (PCA Projection)", fontsize=12)
-    ax2.legend(title="Cluster", loc="best")
-    st.pyplot(fig2)
+# --- Apply KMeans ---
+kmeans = KMeans(n_clusters=3, random_state=42, n_init=10)
+df['crime_cluster'] = kmeans.fit_predict(X_scaled).astype(str) # Convert cluster to string for Plotly hue
 
-    # --- Cluster Profile ---
-    st.subheader("Cluster Profile – Average Crime Rates per Cluster")
-    cluster_profile = df.groupby('crime_cluster')[features].mean().T
 
-    fig3, ax3 = plt.subplots(figsize=(7, 4))
-    cluster_profile.plot(kind='bar', ax=ax3)
-    ax3.set_title("Crime Type Distribution by Cluster", fontsize=12)
-    ax3.set_ylabel("Average Crime Level")
-    ax3.set_xticklabels(ax3.get_xticklabels(), rotation=0)
-    st.pyplot(fig3)
+# --- PCA Visualization (Plotly Conversion) ---
+st.subheader("PCA Visualization – Crime Pattern Clusters")
+pca = PCA(n_components=2)
+pca_data = pca.fit_transform(X_scaled)
+df['PC1'], df['PC2'] = pca_data[:, 0], pca_data[:, 1]
 
+# Convert Seaborn/Matplotlib Scatter plot to Plotly
+fig_pca = px.scatter(
+    df, 
+    x='PC1', 
+    y='PC2', 
+    color='crime_cluster',
+    title="Crime Pattern Clusters (PCA Projection)",
+    labels={'PC1': 'Principal Component 1', 'PC2': 'Principal Component 2', 'crime_cluster': 'Cluster'},
+    color_discrete_sequence=px.colors.qualitative.Vivid, # Use a vibrant color palette
+    hover_data=df.columns
+)
+fig_pca.update_traces(marker=dict(size=10, line=dict(width=1, color='DarkSlateGrey')))
+fig_pca.update_layout(height=500)
+st.plotly_chart(fig_pca, use_container_width=True)
+
+
+# --- Cluster Profile (Plotly Conversion) ---
+st.subheader("Cluster Profile – Average Crime Rates per Cluster")
+cluster_profile = df.groupby('crime_cluster')[features].mean().T
+
+# Convert Matplotlib Bar plot to Plotly
+fig_profile = px.bar(
+    cluster_profile.reset_index(),
+    x='index',
+    y=cluster_profile.columns,
+    barmode='group',
+    title="Crime Type Distribution by Cluster",
+    labels={'index': 'Crime Type', 'value': 'Average Crime Level', 'crime_cluster': 'Cluster'},
+    color_discrete_sequence=px.colors.qualitative.Vivid
+)
+fig_profile.update_layout(
+    xaxis_title="Crime Type", 
+    yaxis_title="Average Crime Level",
+    legend_title="Cluster",
+    height=400,
+    margin=dict(l=20, r=20, t=40, b=20)
+)
+st.plotly_chart(fig_profile, use_container_width=True)
     # === INTERPRETATION ===
     st.markdown("---")
     st.subheader("Interpretation & Insights")
