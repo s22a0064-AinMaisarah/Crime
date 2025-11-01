@@ -35,74 +35,70 @@ st.title("Objective 3 — Preferred Start Time & Correlation Matrix")
 url = "https://raw.githubusercontent.com/nadiashahzanani/Sleep-Anxiety-Visualization/refs/heads/main/Time_to_think_Norburyy.csv"
 df = pd.read_csv(url)
 
-# Fixed column names (adjust as per your dataset)
-psqi_col = "PSQI_Score" if "PSQI_Score" in df.columns else df.columns[8]
-anx_col = "Trait_Anxiety" if "Trait_Anxiety" in df.columns else df.columns[6]
-chrono_col = "MEQ" if "MEQ" in df.columns else df.columns[5]
-sleep_cat_col = "sleep_category" if "sleep_category" in df.columns else df.columns[9]
-start_col = "Start_time_code" if "Start_time_code" in df.columns else df.columns[10]
+# ------------------------------------------------------------------------------------------------------
+# 3️⃣ Gender Composition, Age Distribution, and Education Levels Influence Different Categories of Crime
+# ------------------------------------------------------------------------------------------------------
+# Define the crime score columns
+crime_cols = ['violent_crime', 'property_crime', 'whitecollar_crime', 'social_crime']
 
-# --- Bar Chart: Preferred Start Time by Sleep Category ---
-st.subheader("Preferred University Start Time by Sleep Category")
+# Categorize cities based on male population percentage (you can adjust the bins)
+# Let's use quartiles for simplicity
+df_uber_cleaned['male_category'] = pd.qcut(df_uber_cleaned['male'], q=3, labels=['Low-Male', 'Balanced-Gender', 'High-Male'])
 
-# ✅ Match Google Colab’s output (remove warning)
-fig, ax = plt.subplots(figsize=(7,4))
-sns.countplot(x=start_col, hue=sleep_cat_col, data=df, palette='muted', ax=ax)
-ax.set_title("Preferred University Start Time by Sleep Category")
-ax.set_xlabel("Preferred Start Time Code")
-ax.set_ylabel("Number of Students")
-ax.legend(title="Sleep Category")
-st.pyplot(fig)
+# Calculate the average crime scores per male category
+male_category_crime_means = df_uber_cleaned.groupby('male_category', observed=True)[crime_cols].mean().reset_index()
 
-st.markdown("""
-**Interpretation:**  
-This chart shows how students’ preferred class start times relate to their sleep category.  
-Students with **poorer sleep quality** often prefer **later start times**, while good sleepers prefer earlier classes.  
-This pattern supports the idea that evening chronotypes align with delayed daily schedules.
-""")
+# Melt the DataFrame for Plotly Express
+crime_scores_melted_gender = male_category_crime_means.melt(
+    id_vars='male_category',
+    var_name='Crime Type',
+    value_name='Average Crime Score'
+)
 
+# Create an interactive grouped bar chart
+fig_gender_crime = px.bar(
+    crime_scores_melted_gender,
+    x='Crime Type',
+    y='Average Crime Score',
+    color='male_category',
+    barmode='group',
+    hover_data=['male_category', 'Crime Type', 'Average Crime Score'],
+    title='Interactive Bar Chart: Average Crime Scores by Male Population Percentage Category',
+    labels={'male_category': 'Male Population Category'}
+)
+fig_gender_crime.show()
 
-# --- Scatter Plot: Anxiety vs Sleep Quality (Colored by Start Time) ---
-if 'Start_time_code' in df.columns:
-    st.subheader("Trait Anxiety vs Sleep Quality by Preferred Start Time")
-    
-    # Create the figure
-    fig, ax = plt.subplots(figsize=(7,5))
-    sns.scatterplot(
-        x='psqi_2_groups', 
-        y='Trait_Anxiety', 
-        hue='Start_time_code', 
-        data=df, 
-        palette='Spectral',
-        ax=ax
-    )
-    ax.set_xlabel("Sleep Quality (PSQI)")
-    ax.set_ylabel("Trait Anxiety")
-    ax.set_title("Trait Anxiety vs Sleep Quality by Preferred Start Time")
-    
-    # Show the plot in Streamlit
-    st.pyplot(fig)
+# Define the crime score columns
+crime_cols = ['violent_crime', 'property_crime', 'whitecollar_crime', 'social_crime']
 
-# --- Correlation Heatmap ---
-st.subheader("Correlation Heatmap")
-# Use the exact 3 columns from your Colab
-selected_cols = ['psqi_2_groups', 'Trait_Anxiety', 'MEQ']
+# Calculate the average crime scores per age group
+age_group_crime_means = df_uber_cleaned.groupby('age', observed=True)[crime_cols].mean().reset_index()
 
-# Compute correlation matrix
-corr = df[selected_cols].corr()
+# Create a list of crime types for the theta axis
+categories = crime_cols
 
-# Plot same style as in Colab
-fig, ax = plt.subplots(figsize=(7,5))
-sns.heatmap(corr, annot=True, cmap='vlag', vmin=-1, vmax=1, ax=ax)
-ax.set_title("Correlation Heatmap of Key Variables")
+# Create the figure
+fig = go.Figure()
 
-# Show in Streamlit
-st.pyplot(fig)
+# Add a trace for each age group
+for index, row in age_group_crime_means.iterrows():
+    fig.add_trace(go.Scatterpolar(
+        r=row[crime_cols].tolist(),
+        theta=categories,
+        fill='toself',
+        name=f'Age Group {row["age"]}'
+    ))
 
-st.markdown("""
-**Interpretation:**  
-This heatmap mirrors the Google Colab visualization.  
-It shows correlation values among **Sleep Quality (PSQI)**, **Trait Anxiety**, and **Chronotype (MEQ)**.  
-Positive values (red) indicate that higher PSQI relates to higher anxiety,  
-while negative values (blue) show inverse relationships.
-""")
+# Update the layout
+fig.update_layout(
+    polar=dict(
+        radialaxis=dict(
+            visible=True,
+            range=[0, age_group_crime_means[crime_cols].values.max()] # Set range based on max crime score
+        )),
+    showlegend=True,
+    title='Interactive Radar Chart: Average Crime Scores by Age Group and Crime Type'
+)
+
+# Show the plot
+fig.show()
