@@ -31,7 +31,7 @@ def load_data(url, encoding):
         return pd.DataFrame()
 
 # --- DATA URL ---
-CSV_URL = 'https://raw.githubusercontent.com/s22a0064-AinMaisarah/UrbanCrime/refs/heads/main/df_uber_cleaned.csv'
+CSV_URL = 'https://raw.githubusercontent.com/s22a0064-AinMaisarah/Crime/refs/heads/main/df_crime_cleaned.csv'
 ENCODING_TYPE = 'cp1252'
 
 df = load_data(CSV_URL, ENCODING_TYPE)
