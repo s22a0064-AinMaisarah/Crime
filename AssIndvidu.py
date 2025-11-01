@@ -26,9 +26,9 @@ st.write(
 )
 
 # Navigation Pages
-page1 = st.Page("pages/Objective1.py", title="Distribution and Correlation", icon=":material/bar_chart:")
-page2 = st.Page("pages/Objective2.py", title="Group Comparisons and Chronotype", icon=":material/groups:")
-page3 = st.Page("pages/Objective3.py", title="Preferred Start Time & Correlation Matrix", icon=":material/timeline:")
+page1 = st.Page("pages/Objectives1.py", title="Distribution and Correlation", icon=":material/bar_chart:")
+page2 = st.Page("pages/Objectives2.py", title="Group Comparisons and Chronotype", icon=":material/groups:")
+page3 = st.Page("pages/Objectives3.py", title="Preferred Start Time & Correlation Matrix", icon=":material/timeline:")
 
 pg = st.navigation({"Menu": [page1, page2, page3]})
 pg.run()
