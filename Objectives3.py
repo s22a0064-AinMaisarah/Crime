@@ -2,6 +2,32 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+# ------------------------------------------------------------
+# Page Setup
+# ------------------------------------------------------------
+st.set_page_config(page_title="Urban Crime Analytics Visualization Dashboard", layout="wide")
+
+# Header title
+st.header("Explore trends, hotspots, and patterns through interactive visuals")
+
+# Intro paragraph
+st.write(
+    """
+    This dashboard presents an interactive visualization of urban crime data, it enables a deeper understanding of crime distribution 
+    and supports data-driven decision-making for urban safety and policy planning.
+    """
+)
+
+# Dataset information
+st.write(
+    """
+   This dataset, originally titled "Uber and Urban Crime" and published on 12 October 2019 by Bryan Weber,
+   focuses primarily on crime-related data within urban environments. Although the dataset references Uber, 
+   the analysis in this dashboard emphasizes the crime dimension, exploring patterns, frequency, and distribution of criminal
+   incidents associated with urban mobility contexts.
+    """
+)
+
 
 st.title("Objective 3 — Preferred Start Time & Correlation Matrix")
 
