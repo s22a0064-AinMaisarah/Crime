@@ -32,7 +32,7 @@ st.write(
 # ------------------------------------------------------------
 # Page Navigation Setup
 # ------------------------------------------------------------
-page1 = st.Page('Objectives1.py', title='Distribution and Correlation', icon=":material/bar_chart:")
+page1 = st.Page('Objectives1.py', title='Urban Crime Analytics Visualization Dashboard', icon=":material/bar_chart:")
 page2 = st.Page('Objectives2.py', title='Group Comparisons and Chronotype', icon=":material/groups:")
 page3 = st.Page('Objectives3.py', title='Preferred Start Time & Correlation Matrix', icon=":material/timeline:")
 
