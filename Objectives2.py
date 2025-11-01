@@ -90,3 +90,40 @@ fig_poverty_offense = px.scatter(
     trendline='ols' # Add OLS trendline
 )
 fig_poverty_offense.show()
+
+# ------------------------------------------------------------
+# Summary Box (Improved for Urban Crime Analytics)
+# ------------------------------------------------------------
+st.markdown(
+    """
+    <div style="
+        background-color:#f8faff;
+        padding:20px;
+        border-radius:10px;
+        border-left:6px solid #4a90e2;
+        margin-top:30px;">
+    <h4>📊 Summary of Findings</h4>
+    <p>
+    • <b>Crime Clustering Analysis (K-Means & PCA):</b> Identified three distinct city groups characterized by different crime intensities — 
+      high-crime, moderate-crime, and low-crime zones.<br><br>
+
+    • <b>Socioeconomic Correlations:</b> Higher poverty rates and lower income levels show strong positive associations with increased 
+      offense counts, particularly in Group I (major urban centers).<br><br>
+
+    • <b>Demographic Influences:</b> 
+      - Cities with higher proportions of males tend to report slightly elevated violent and property crime rates.<br>
+      - Age distribution affects the prevalence of crime types, with certain age brackets linked to higher white-collar or social crime scores.<br>
+      - Education level demonstrates an inverse relationship with total crime rates — higher education attainment is generally linked with 
+        lower average crime scores.<br><br>
+
+    • <b>Policy Insight:</b> The combined results emphasize the importance of integrating socioeconomic and demographic indicators into 
+      urban safety strategies and resource allocation for crime prevention.
+    </p>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+# ------------------------------------------------------------
+st.markdown("---")
+st.caption("Created by Nurul Ain Maisarah Hamidin © 2025 | Scientific Visualization Project")
