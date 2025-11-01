@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import matplotlib
+matplotlib.use("Agg")  # Safe backend for Streamlit environments
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -18,7 +20,7 @@ Exploring how **gender**, **age**, and **education levels** influence different 
 """)
 st.markdown("---")
 
-# --- LOAD DATA ---
+# --- LOAD DATA FUNCTION ---
 @st.cache_data
 def load_data(url, encoding):
     try:
@@ -29,8 +31,8 @@ def load_data(url, encoding):
         return pd.DataFrame()
 
 # --- DATA URL ---
-CSV_URL = 'https://raw.githubusercontent.com/s22a0064-AinMaisarah/UrbanCrime/refs/heads/main/df_uber_cleaned.csv'
-ENCODING_TYPE = 'cp1252'
+CSV_URL = "https://raw.githubusercontent.com/s22a0064-AinMaisarah/UrbanCrime/refs/heads/main/df_uber_cleaned.csv"
+ENCODING_TYPE = "cp1252"
 
 df_uber_cleaned = load_data(CSV_URL, ENCODING_TYPE)
 
@@ -53,26 +55,26 @@ if not df_uber_cleaned.empty:
     # === GENDER VS CRIME ===
     st.subheader("1️⃣ Gender Category and Crime Type")
 
-    male_threshold = df_uber_cleaned['male'].mean()
-    df_uber_cleaned['gender_category'] = df_uber_cleaned['male'].apply(
-        lambda x: 'High-Male' if x > male_threshold else 'Balanced-Gender'
+    male_threshold = df_uber_cleaned["male"].mean()
+    df_uber_cleaned["gender_category"] = df_uber_cleaned["male"].apply(
+        lambda x: "High-Male" if x > male_threshold else "Balanced-Gender"
     )
 
     crime_scores_melted_gender = df_uber_cleaned.melt(
-        id_vars='gender_category',
-        value_vars=['violent_crime', 'property_crime', 'whitecollar_crime', 'social_crime'],
-        var_name='Crime Type',
-        value_name='Average Crime Score'
+        id_vars="gender_category",
+        value_vars=["violent_crime", "property_crime", "whitecollar_crime", "social_crime"],
+        var_name="Crime Type",
+        value_name="Average Crime Score"
     )
 
     fig1, ax1 = plt.subplots(figsize=(10, 6))
     sns.barplot(
-        x='gender_category', y='Average Crime Score', hue='Crime Type',
-        data=crime_scores_melted_gender, ax=ax1, palette='coolwarm'
+        x="gender_category", y="Average Crime Score", hue="Crime Type",
+        data=crime_scores_melted_gender, ax=ax1, palette="coolwarm"
     )
-    ax1.set_title('Average Crime Scores by Gender Category and Crime Type', fontsize=13)
-    ax1.set_xlabel('Gender Category')
-    ax1.set_ylabel('Average Crime Score')
+    ax1.set_title("Average Crime Scores by Gender Category and Crime Type", fontsize=13)
+    ax1.set_xlabel("Gender Category")
+    ax1.set_ylabel("Average Crime Score")
     st.pyplot(fig1)
 
     st.info("""
@@ -86,8 +88,8 @@ if not df_uber_cleaned.empty:
     # === AGE GROUP VS CRIME (RADAR CHART) ===
     st.subheader("2️⃣ Age Group and Crime Type")
 
-    crime_cols = ['violent_crime', 'property_crime', 'whitecollar_crime', 'social_crime']
-    age_group_crime_means = df_uber_cleaned.groupby('age')[crime_cols].mean().reset_index()
+    crime_cols = ["violent_crime", "property_crime", "whitecollar_crime", "social_crime"]
+    age_group_crime_means = df_uber_cleaned.groupby("age")[crime_cols].mean().reset_index()
 
     num_vars = len(crime_cols)
     angles = np.linspace(0, 2 * np.pi, num_vars, endpoint=False).tolist()
@@ -101,8 +103,8 @@ if not df_uber_cleaned.empty:
         ax2.fill(angles, values, alpha=0.1)
 
     ax2.set_thetagrids(np.degrees(angles[:-1]), crime_cols)
-    ax2.set_title('Average Crime Scores by Age Group and Crime Type', size=14, y=1.1)
-    ax2.legend(loc='upper right', bbox_to_anchor=(1.3, 1.1))
+    ax2.set_title("Average Crime Scores by Age Group and Crime Type", size=14, y=1.1)
+    ax2.legend(loc="upper right", bbox_to_anchor=(1.3, 1.1))
     ax2.grid(True)
     st.pyplot(fig2)
 
@@ -117,33 +119,33 @@ if not df_uber_cleaned.empty:
     # === EDUCATION VS CRIME (VIOLIN PLOT) ===
     st.subheader("3️⃣ Education Level and Crime Type")
 
-    education_cols = ['high_school_below', 'high_school', 'some_college', 'bachelors_degree']
-    crime_cols = ['violent_crime', 'property_crime', 'whitecollar_crime', 'social_crime']
+    education_cols = ["high_school_below", "high_school", "some_college", "bachelors_degree"]
+    crime_cols = ["violent_crime", "property_crime", "whitecollar_crime", "social_crime"]
 
     crime_melted = df_uber_cleaned.melt(
         value_vars=crime_cols,
-        var_name='Crime Type',
-        value_name='Crime Score',
+        var_name="Crime Type",
+        value_name="Crime Score",
         id_vars=education_cols
     )
 
     education_crime_melted = crime_melted.melt(
-        id_vars=['Crime Type', 'Crime Score'],
+        id_vars=["Crime Type", "Crime Score"],
         value_vars=education_cols,
-        var_name='Education Level',
-        value_name='Education Percentage'
+        var_name="Education Level",
+        value_name="Education Percentage"
     )
 
     fig3, ax3 = plt.subplots(figsize=(12, 6))
     sns.violinplot(
-        x='Education Level', y='Crime Score', hue='Crime Type',
-        data=education_crime_melted, split=True, inner='quartile', palette='viridis', ax=ax3
+        x="Education Level", y="Crime Score", hue="Crime Type",
+        data=education_crime_melted, split=True, inner="quartile", palette="viridis", ax=ax3
     )
-    ax3.set_title('Distribution of Crime Scores by Education Level and Crime Type', fontsize=13)
-    ax3.set_xlabel('Education Level')
-    ax3.set_ylabel('Crime Score')
-    plt.xticks(rotation=45, ha='right')
-    ax3.legend(title='Crime Type')
+    ax3.set_title("Distribution of Crime Scores by Education Level and Crime Type", fontsize=13)
+    ax3.set_xlabel("Education Level")
+    ax3.set_ylabel("Crime Score")
+    plt.xticks(rotation=45, ha="right")
+    ax3.legend(title="Crime Type")
     st.pyplot(fig3)
 
     st.info("""
@@ -154,6 +156,7 @@ if not df_uber_cleaned.empty:
     """)
 
     st.markdown("---")
+
     st.success("""
     ✅ **Summary:**  
     This demographic-focused analysis complements the clustering results from *crime1.py*, 
