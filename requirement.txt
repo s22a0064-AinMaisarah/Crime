@@ -1,11 +1,9 @@
 streamlit
 pandas
 numpy
-plotly express
 scikit-learn
+plotly
 matplotlib
 seaborn
-plotly
-
 
 
